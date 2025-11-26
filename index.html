@@ -23,16 +23,17 @@
             width: 100%;
             max-width: 1024px;
             aspect-ratio: 16/9;
+            background-color: #000; /* Default background for safety */
         }
 
         canvas {
-            background-color: #000;
             display: block;
             width: 100%;
             height: 100%;
+            transition: opacity 0.5s;
         }
 
-        /* UI Layer Utama */
+        /* --- UI UTAMA GAME --- */
         .ui-layer {
             position: absolute;
             top: 0;
@@ -45,7 +46,6 @@
             pointer-events: none;
         }
 
-        /* Health Bars */
         .health-bar-container {
             width: 40%;
             height: 30px;
@@ -63,7 +63,6 @@
         #p1Health { background: linear-gradient(90deg, #0055ff, #00aaff); box-shadow: 0 0 10px #00aaff; }
         #p2Health { background: linear-gradient(90deg, #ff0000, #ff5555); box-shadow: 0 0 10px #ff5555; float: right;}
 
-        /* Tengah UI: Timer dan Info Ronde */
         .center-ui {
             display: flex;
             flex-direction: column;
@@ -71,6 +70,7 @@
             color: white;
             text-align: center;
             line-height: 1.1;
+            pointer-events: none;
         }
 
         #timer {
@@ -86,10 +86,9 @@
             margin-top: -5px;
         }
 
-        /* Display Score */
         .score-display {
             position: absolute;
-            top: 60px; /* Di bawah Health Bar */
+            top: 60px;
             width: 100%;
             display: flex;
             justify-content: center;
@@ -102,7 +101,6 @@
         }
         .score-label { font-size: 14px; color: #888; }
         .p1-score, .p2-score { text-align: center; }
-
 
         #displayText {
             position: absolute;
@@ -130,12 +128,161 @@
             background: rgba(0,0,0,0.5);
             padding: 5px;
         }
+
+        #restartButton {
+            position: absolute;
+            top: 65%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            font-size: 24px;
+            font-weight: bold;
+            color: white;
+            background: linear-gradient(145deg, #4CAF50, #388E3C);
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 255, 0, 0.4);
+            transition: all 0.2s ease;
+            z-index: 11;
+            display: none; 
+            pointer-events: auto;
+        }
+
+        #restartButton:hover {
+            background: linear-gradient(145deg, #388E3C, #4CAF50);
+            box-shadow: 0 6px 20px rgba(0, 255, 0, 0.6);
+            transform: translate(-50%, -2px);
+        }
+
+        /* --- SETUP SCREEN (Baru) --- */
+        #setupScreen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.95);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 5vh;
+            z-index: 20;
+            overflow-y: auto;
+        }
+
+        .setup-section {
+            margin-bottom: 30px;
+            width: 90%;
+            max-width: 800px;
+            text-align: center;
+        }
+
+        .setup-section h2 {
+            font-size: 28px;
+            border-bottom: 2px solid #555;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            color: #00ccff;
+            text-shadow: 0 0 5px #00ccff;
+        }
+
+        .options-container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .option-card {
+            background-color: #222;
+            border: 3px solid transparent;
+            border-radius: 10px;
+            padding: 10px 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            width: 140px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        }
+
+        .option-card:hover {
+            background-color: #333;
+        }
+
+        .option-card.selected {
+            border-color: #4CAF50;
+            background-color: #1f3520;
+            box-shadow: 0 0 15px #4CAF50;
+            transform: scale(1.05);
+        }
+        
+        .weapon-info {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #aaa;
+        }
+        .weapon-info .damage { color: #f9d873; }
+        .weapon-info .range { color: #00ffff; }
+
+        #startGameButton {
+            margin-top: 20px;
+            padding: 20px 40px;
+            font-size: 30px;
+            font-weight: bold;
+            color: #1a1a1a;
+            background: linear-gradient(145deg, #00ccff, #0055ff);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 20px rgba(0, 204, 255, 0.8);
+            transition: all 0.3s ease;
+        }
+
+        #startGameButton:hover {
+            background: linear-gradient(145deg, #0055ff, #00ccff);
+            box-shadow: 0 0 30px rgba(0, 204, 255, 1);
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
 
 <div id="gameContainer">
-    <div class="ui-layer">
+    <!-- SETUP SCREEN -->
+    <div id="setupScreen">
+        <h1>Duel Stickman: Pengaturan Pertandingan</h1>
+
+        <!-- Pilihan Map -->
+        <div class="setup-section">
+            <h2>Pilih Map Pertarungan (Arena)</h2>
+            <div id="mapOptions" class="options-container">
+                <!-- Map options will be injected here by JS -->
+            </div>
+        </div>
+
+        <!-- Pilihan Senjata P1 -->
+        <div class="setup-section">
+            <h2>Pilih Senjata - Player 1 (Biru)</h2>
+            <div id="p1WeaponOptions" class="options-container">
+                <!-- P1 Weapon options will be injected here by JS -->
+            </div>
+        </div>
+
+        <!-- Pilihan Senjata P2 -->
+        <div class="setup-section">
+            <h2>Pilih Senjata - Player 2 (Merah)</h2>
+            <div id="p2WeaponOptions" class="options-container">
+                <!-- P2 Weapon options will be injected here by JS -->
+            </div>
+        </div>
+
+        <button id="startGameButton">MULAI PERTANDINGAN</button>
+    </div>
+
+    <!-- GAME UI (Disembunyikan saat Setup) -->
+    <div class="ui-layer" style="opacity: 0; transition: opacity 0.5s;" id="gameUI">
         <div class="health-bar-container"><div id="p1Health" class="health-bar"></div></div>
         <div class="center-ui">
             <div id="timer">60</div>
@@ -144,12 +291,14 @@
         <div class="health-bar-container"><div id="p2Health" class="health-bar"></div></div>
     </div>
 
-    <div class="score-display">
+    <div class="score-display" style="opacity: 0; transition: opacity 0.5s;" id="scoreUI">
         <div class="p1-score"><span class="score-label">P1 Wins:</span> <span id="p1ScoreDisplay">0</span></div>
         <div class="p2-score"><span class="score-label">P2 Wins:</span> <span id="p2ScoreDisplay">0</span></div>
     </div>
 
     <div id="displayText">Match Over!</div>
+    <button id="restartButton">Mulai Ulang Pertandingan</button>
+
     <div class="controls-hint">
         P1 (Biru): <b>A/D</b> (Gerak) <b>W</b> (Lompat) <b>SPASI</b> (Serang) <br>
         P2 (Merah): <b>Panah Kiri/Kanan</b> (Gerak) <b>Atas</b> (Lompat) <b>ENTER</b> (Serang)
@@ -160,14 +309,37 @@
 <script>
     const canvas = document.querySelector('canvas');
     const c = canvas.getContext('2d');
+    const gameContainer = document.querySelector('#gameContainer');
+    const setupScreen = document.querySelector('#setupScreen');
+    const startGameButton = document.querySelector('#startGameButton');
+    const restartButton = document.querySelector('#restartButton');
+    const gameUI = document.querySelector('#gameUI');
+    const scoreUI = document.querySelector('#scoreUI');
 
-    // --- KONFIGURASI GAME ---
+    // --- KONFIGURASI GAME & PILIHAN ---
     canvas.width = 1024;
     canvas.height = 576;
     const gravity = 0.7;
-    const maxWins = 2; // Pemenang Match adalah yang pertama mencapai 2 kemenangan
+    const maxWins = 2; 
     
-    // --- STATE GAME ---
+    // Konfigurasi Map
+    const MAP_CONFIGS = {
+        default: { name: 'Arena Gelap', bgColor: 'rgba(0, 0, 0, 0.4)', floorColor: '#222', gravity: 0.7 },
+        lavaPit: { name: 'Kawah Lava', bgColor: 'rgba(50, 0, 0, 0.4)', floorColor: '#8b0000', gravity: 0.75, visualEffect: 'shadow' },
+        skyPlatform: { name: 'Platform Langit', bgColor: 'rgba(0, 0, 50, 0.4)', floorColor: '#a0c4ff', gravity: 0.5 }, // Gravitasi lebih rendah
+        forest: { name: 'Hutan Malam', bgColor: 'rgba(0, 30, 0, 0.4)', floorColor: '#3d2b1f', gravity: 0.7 },
+        cyberGrid: { name: 'Jejaring Cyber', bgColor: 'rgba(0, 20, 20, 0.4)', floorColor: '#005555', gravity: 0.7, visualEffect: 'grid' }
+    };
+    
+    // Konfigurasi Senjata
+    const WEAPON_CONFIGS = {
+        saber: { name: 'Saber Standar', damage: 10, width: 140, cooldown: 100, visualLength: 60, visualWidth: 4, saberColor: true },
+        axe: { name: 'Pedang Berat (Axe)', damage: 15, width: 100, cooldown: 250, visualLength: 70, visualWidth: 8, saberColor: true },
+        dagger: { name: 'Belati Cepat', damage: 5, width: 80, cooldown: 50, visualLength: 40, visualWidth: 2, saberColor: true },
+        whip: { name: 'Cambuk Energi', damage: 8, width: 180, cooldown: 150, visualLength: 120, visualWidth: 3, saberColor: true }
+    };
+
+    // --- STATE GAME & SELEKSI ---
     let timer = 60;
     let timerId;
     let isGameRunning = false;
@@ -175,23 +347,38 @@
     let p1Score = 0;
     let p2Score = 0;
     let matchOver = false;
+    
+    // State Seleksi
+    let selectedMap = 'default';
+    let selectedWeaponP1 = 'saber';
+    let selectedWeaponP2 = 'saber';
+    let currentMapConfig = MAP_CONFIGS[selectedMap];
+
 
     // --- KELAS FIGHTER (Stickman) ---
     class Fighter {
-        constructor({ position, velocity, color, offset, isPlayer1 }) {
+        constructor({ position, velocity, color, offset, isPlayer1, weaponKey }) {
             this.position = position;
             this.velocity = velocity;
             this.width = 40;
             this.height = 100;
             this.lastKey;
+            
+            // Konfigurasi Senjata
+            this.weapon = WEAPON_CONFIGS[weaponKey];
+            this.attackDamage = this.weapon.damage;
+            this.attackCooldown = this.weapon.cooldown;
+
             this.attackBox = {
                 position: { x: this.position.x, y: this.position.y },
                 offset: offset,
-                width: 140,
+                width: this.weapon.width, // Ambil dari konfigurasi
                 height: 50
             };
-            this.color = color;
+            
+            this.color = color; // Warna Lightsaber
             this.isAttacking = false;
+            this.attackBlocked = false; // Untuk mencegah spam saat cooldown
             this.health = 100;
             this.isPlayer1 = isPlayer1;
             this.facingRight = isPlayer1;
@@ -205,9 +392,9 @@
                 let windLift = Math.abs(this.velocity.x) * 4; 
                 let windLag = -(this.velocity.x * 2);
 
-                c.fillStyle = this.isPlayer1 ? '#001a33' : '#330000'; // Warna Jubah
+                c.fillStyle = this.isPlayer1 ? '#001a33' : '#330000'; 
                 c.beginPath();
-                c.moveTo(this.position.x + 25, this.position.y + 25); // Titik leher
+                c.moveTo(this.position.x + 25, this.position.y + 25); 
                 
                 c.lineTo(this.position.x + 25 + (35 * capeDirection) + windLag, this.position.y + 85 - windLift); 
                 c.lineTo(this.position.x + 25 + (10 * capeDirection) + windLag, this.position.y + 85); 
@@ -216,6 +403,7 @@
             }
 
             // 2. HP BAR MELAYANG (FLOATING HP)
+            // (Kode HP Bar Melayang tetap sama)
             if (!this.dead) {
                 c.fillStyle = '#444';
                 c.fillRect(this.position.x - 10, this.position.y - 25, 60, 6);
@@ -256,47 +444,37 @@
 
             c.stroke();
 
-            // 4. GAMBAR AKSESORIS TOPENG/MATA
+            // 4. GAMBAR AKSESORIS TOPENG/MATA (Tetap sama)
             if (!this.dead) {
                 if (this.isPlayer1) {
-                    // --- PLAYER 1: CYBER VISOR ---
-                    c.shadowBlur = 10;
-                    c.shadowColor = '#00ffff';
-                    c.fillStyle = '#00ffff'; 
+                    c.shadowBlur = 10; c.shadowColor = '#00ffff'; c.fillStyle = '#00ffff'; 
                     let visorStart = this.facingRight ? this.position.x + 18 : this.position.x + 12;
-                    let visorWidth = 20;
-                    c.fillRect(visorStart, this.position.y + 6, visorWidth, 4);
+                    c.fillRect(visorStart, this.position.y + 6, 20, 4);
                     c.shadowBlur = 0;
                 } else {
-                    // --- PLAYER 2: TACTICAL X MASK ---
-                    c.strokeStyle = '#ff0000';
-                    c.lineWidth = 2;
-                    c.beginPath();
-                    let centerX = this.position.x + 25;
-                    let centerY = this.position.y + 10;
-                    c.moveTo(centerX - 6, centerY - 6);
-                    c.lineTo(centerX + 6, centerY + 6);
-                    c.moveTo(centerX + 6, centerY - 6);
-                    c.lineTo(centerX - 6, centerY + 6);
+                    c.strokeStyle = '#ff0000'; c.lineWidth = 2; c.beginPath();
+                    let centerX = this.position.x + 25; let centerY = this.position.y + 10;
+                    c.moveTo(centerX - 6, centerY - 6); c.lineTo(centerX + 6, centerY + 6);
+                    c.moveTo(centerX + 6, centerY - 6); c.lineTo(centerX - 6, centerY + 6);
                     c.stroke();
                 }
             }
 
-            // 5. GAMBAR LIGHTSABER (SENJATA)
+            // 5. GAMBAR SENJATA (Disesuaikan dengan konfigurasi)
             if (!this.dead) {
                 c.shadowBlur = 15;
                 c.shadowColor = this.color;
                 c.strokeStyle = this.color;
-                c.lineWidth = 4;
+                c.lineWidth = this.weapon.visualWidth; 
                 c.beginPath();
                 c.moveTo(handX, this.position.y + 50);
                 
-                let saberTipX = handX + (this.facingRight ? 60 : -60);
+                let saberTipX = handX + (this.facingRight ? this.weapon.visualLength : -this.weapon.visualLength);
                 let saberTipY = this.position.y + 10;
                 
                 if (this.isAttacking) {
                     saberTipY = this.position.y + 60;
-                    saberTipX = handX + (this.facingRight ? 80 : -80);
+                    saberTipX = handX + (this.facingRight ? this.weapon.visualLength + 20 : -(this.weapon.visualLength + 20));
                 }
 
                 c.lineTo(saberTipX, saberTipY);
@@ -332,7 +510,8 @@
                     this.velocity.y = 0;
                     this.position.y = canvas.height - 50 - this.height;
                 } else {
-                    this.velocity.y += gravity;
+                    // Gunakan gravitasi dari konfigurasi Map
+                    this.velocity.y += currentMapConfig.gravity; 
                 }
                 
                 if (this.position.x < 0) this.position.x = 0;
@@ -341,31 +520,23 @@
         }
 
         attack() {
-            if(!this.isAttacking) {
+            if(!this.isAttacking && !this.attackBlocked) {
                 this.isAttacking = true;
+                this.attackBlocked = true;
                 setTimeout(() => {
                     this.isAttacking = false;
-                }, 100);
+                }, 100); // Durasi Animasi Serangan
+
+                // Cooldown Serangan
+                setTimeout(() => {
+                    this.attackBlocked = false;
+                }, this.attackCooldown); 
             }
         }
     }
 
-    // --- INSTANSIASI PLAYERS ---
-    const player = new Fighter({
-        position: { x: 200, y: 0 },
-        velocity: { x: 0, y: 0 },
-        color: '#00ccff', 
-        offset: { x: 0, y: 20 },
-        isPlayer1: true
-    });
-
-    const enemy = new Fighter({
-        position: { x: 750, y: 0 },
-        velocity: { x: 0, y: 0 },
-        color: '#ff0044', 
-        offset: { x: -50, y: 20 },
-        isPlayer1: false
-    });
+    // Instansiasi Players akan dipindahkan ke startGame()
+    let player, enemy; 
 
     const keys = {
         a: { pressed: false },
@@ -406,12 +577,14 @@
     }
 
     function nextRound() {
+        if (timerId) clearTimeout(timerId);
+
+        restartButton.style.display = 'none';
+
         if (p1Score === maxWins || p2Score === maxWins) {
-            // Game selesai, Match Over
             return;
         }
 
-        // Reset state untuk ronde baru
         resetPlayerPositions();
         timer = 60;
         document.querySelector('#timer').innerHTML = timer;
@@ -419,12 +592,12 @@
         document.querySelector('#displayText').style.display = 'none';
         isGameRunning = true;
         decreaseTimer();
-        animate(); // Pastikan animasi berjalan
+        animate(); 
     }
 
 
     function determineWinner({ winnerName, isDraw }) {
-        if (!isGameRunning) return; // Mencegah pemanggilan berulang
+        if (!isGameRunning) return;
 
         clearTimeout(timerId);
         isGameRunning = false;
@@ -442,19 +615,17 @@
             displayTextElement.innerHTML = `RONDE ${currentRound} - PLAYER 2 MENANG!`;
         }
         
-        // Update skor
         document.querySelector('#p1ScoreDisplay').innerHTML = p1Score;
         document.querySelector('#p2ScoreDisplay').innerHTML = p2Score;
         
-        // Cek Pemenang Match
         if (p1Score === maxWins || p2Score === maxWins) {
             const matchWinner = p1Score === maxWins ? 'PLAYER 1' : 'PLAYER 2';
             displayTextElement.innerHTML = `MATCH SELESAI!<br>${matchWinner} MEMENANGKAN PERTANDINGAN! <br>Skor Akhir ${p1Score}-${p2Score}`;
             matchOver = true;
+            restartButton.style.display = 'block';
         } else {
-            // Lanjut ke ronde berikutnya
             currentRound++;
-            setTimeout(nextRound, 3000); // Tunggu 3 detik sebelum memulai ronde baru
+            setTimeout(nextRound, 3000);
         }
     }
 
@@ -467,7 +638,6 @@
         }
         
         if (timer === 0) {
-            // Penentuan pemenang berdasarkan Health
             if (player.health === enemy.health) {
                  determineWinner({ isDraw: true });
             } else if (player.health > enemy.health) {
@@ -478,128 +648,224 @@
         }
     }
 
+    function drawMapBackground() {
+        // Efek visual Map
+        if (currentMapConfig.visualEffect === 'grid') {
+            c.fillStyle = currentMapConfig.bgColor;
+            c.fillRect(0, 0, canvas.width, canvas.height);
+            c.strokeStyle = 'rgba(0, 255, 255, 0.2)';
+            c.lineWidth = 1;
+            for (let i = 0; i < canvas.width; i += 50) {
+                c.beginPath();
+                c.moveTo(i, 0);
+                c.lineTo(i, canvas.height);
+                c.stroke();
+            }
+            for (let i = 0; i < canvas.height - 50; i += 50) {
+                c.beginPath();
+                c.moveTo(0, i);
+                c.lineTo(canvas.width, i);
+                c.stroke();
+            }
+        } else {
+            // Default background fill
+            c.fillStyle = currentMapConfig.bgColor; 
+            c.fillRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
     // --- ANIMASI GAME LOOP ---
     function animate() {
         if (matchOver) return;
 
         window.requestAnimationFrame(animate);
         
-        c.fillStyle = 'rgba(0, 0, 0, 0.4)'; 
-        c.fillRect(0, 0, canvas.width, canvas.height);
-        
-        c.fillStyle = '#222';
+        // 1. Gambar Background Map
+        drawMapBackground();
+
+        // 2. Gambar Lantai (Floor)
+        c.fillStyle = currentMapConfig.floorColor;
         c.fillRect(0, canvas.height - 50, canvas.width, 50);
 
+        // 3. Update dan Gambar Pemain
         player.update();
         enemy.update();
 
         if (isGameRunning) {
-            // Player 1 Movement
+            // Pergerakan (tetap sama)
             player.velocity.x = 0;
-            if (keys.a.pressed && player.lastKey === 'a') {
-                player.velocity.x = -6;
-            } else if (keys.d.pressed && player.lastKey === 'd') {
-                player.velocity.x = 6;
-            }
+            if (keys.a.pressed && player.lastKey === 'a') { player.velocity.x = -6; } 
+            else if (keys.d.pressed && player.lastKey === 'd') { player.velocity.x = 6; }
 
-            // Player 2 Movement
             enemy.velocity.x = 0;
-            if (keys.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') {
-                enemy.velocity.x = -6;
-            } else if (keys.ArrowRight.pressed && enemy.lastKey === 'ArrowRight') {
-                enemy.velocity.x = 6;
-            }
+            if (keys.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') { enemy.velocity.x = -6; } 
+            else if (keys.ArrowRight.pressed && enemy.lastKey === 'ArrowRight') { enemy.velocity.x = 6; }
 
             // Collision Check
             if (rectangularCollision({ rectangle1: player, rectangle2: enemy }) && player.isAttacking) {
                 player.isAttacking = false;
-                enemy.health -= 10;
+                enemy.health -= player.attackDamage; // Gunakan attackDamage dari Senjata
                 if(enemy.health < 0) enemy.health = 0;
                 document.querySelector('#p2Health').style.width = enemy.health + '%';
             }
 
             if (rectangularCollision({ rectangle1: enemy, rectangle2: player }) && enemy.isAttacking) {
                 enemy.isAttacking = false;
-                player.health -= 10;
+                player.health -= enemy.attackDamage; // Gunakan attackDamage dari Senjata
                 if(player.health < 0) player.health = 0;
                 document.querySelector('#p1Health').style.width = player.health + '%';
             }
 
-            // Check K.O. (Health <= 0)
+            // Check K.O.
             if (enemy.health <= 0) {
                 determineWinner({ winnerName: 'Player 1', isDraw: false });
             } else if (player.health <= 0) {
                 determineWinner({ winnerName: 'Player 2', isDraw: false });
             }
-        } else {
-             // Jika game tidak berjalan (setelah K.O. atau timer habis)
-             // Tampilkan pesan "Press ENTER to restart match" jika matchOver = true
-             if (matchOver) {
-                 c.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                 c.font = '20px Courier New';
-                 c.textAlign = 'center';
-                 c.fillText('Tekan R untuk Main Lagi!', canvas.width / 2, canvas.height / 2 + 80);
-             }
         }
     }
 
-    // --- INISIALISASI GAME ---
-    // Dipanggil saat game dimuat
+    // --- SETUP DAN INISIALISASI ---
+
+    function renderSetupScreen() {
+        const mapContainer = document.getElementById('mapOptions');
+        const p1WeaponContainer = document.getElementById('p1WeaponOptions');
+        const p2WeaponContainer = document.getElementById('p2WeaponOptions');
+
+        // Render Maps
+        Object.keys(MAP_CONFIGS).forEach(key => {
+            const map = MAP_CONFIGS[key];
+            const div = document.createElement('div');
+            div.className = `option-card ${key === selectedMap ? 'selected' : ''}`;
+            div.dataset.key = key;
+            div.innerHTML = `<h3>${map.name}</h3>`;
+            div.addEventListener('click', () => {
+                selectedMap = key;
+                currentMapConfig = MAP_CONFIGS[key];
+                document.querySelectorAll('#mapOptions .option-card').forEach(card => card.classList.remove('selected'));
+                div.classList.add('selected');
+            });
+            mapContainer.appendChild(div);
+        });
+
+        // Render Weapons (P1 & P2)
+        const renderWeaponOptions = (container, playerNum) => {
+            Object.keys(WEAPON_CONFIGS).forEach(key => {
+                const weapon = WEAPON_CONFIGS[key];
+                const isSelected = (playerNum === 1 && key === selectedWeaponP1) || (playerNum === 2 && key === selectedWeaponP2);
+                
+                const div = document.createElement('div');
+                div.className = `option-card ${isSelected ? 'selected' : ''}`;
+                div.dataset.key = key;
+                div.innerHTML = `
+                    <h3>${weapon.name}</h3>
+                    <div class="weapon-info">
+                        DMG: <span class="damage">${weapon.damage}</span> | 
+                        RNG: <span class="range">${Math.round(weapon.width / 140 * 100)}%</span> | 
+                        SPD: <span class="speed">${Math.round(100 / weapon.cooldown * 100)}%</span>
+                    </div>
+                `;
+                div.addEventListener('click', () => {
+                    if (playerNum === 1) {
+                        selectedWeaponP1 = key;
+                        document.querySelectorAll('#p1WeaponOptions .option-card').forEach(card => card.classList.remove('selected'));
+                    } else {
+                        selectedWeaponP2 = key;
+                        document.querySelectorAll('#p2WeaponOptions .option-card').forEach(card => card.classList.remove('selected'));
+                    }
+                    div.classList.add('selected');
+                });
+                container.appendChild(div);
+            });
+        };
+
+        renderWeaponOptions(p1WeaponContainer, 1);
+        renderWeaponOptions(p2WeaponContainer, 2);
+    }
+    
+    // Dipanggil saat tombol START GAME atau RESTART diklik
     function startGame() {
+        // Instansiasi Ulang Pemain dengan konfigurasi senjata yang dipilih
+        player = new Fighter({
+            position: { x: 200, y: 0 },
+            velocity: { x: 0, y: 0 },
+            color: '#00ccff', 
+            offset: { x: 0, y: 20 },
+            isPlayer1: true,
+            weaponKey: selectedWeaponP1
+        });
+
+        enemy = new Fighter({
+            position: { x: 750, y: 0 },
+            velocity: { x: 0, y: 0 },
+            color: '#ff0044', 
+            offset: { x: -50, y: 20 },
+            isPlayer1: false,
+            weaponKey: selectedWeaponP2
+        });
+        
+        // Sembunyikan Setup Screen dan Tampilkan UI Game
+        setupScreen.style.display = 'none';
+        gameUI.style.opacity = '1';
+        scoreUI.style.opacity = '1';
+        canvas.style.opacity = '1';
+
         currentRound = 1;
         p1Score = 0;
         p2Score = 0;
         matchOver = false;
+        
+        currentMapConfig = MAP_CONFIGS[selectedMap]; // Pastikan konfigurasi Map terbaru terpakai
+
         document.querySelector('#p1ScoreDisplay').innerHTML = p1Score;
         document.querySelector('#p2ScoreDisplay').innerHTML = p2Score;
-        nextRound(); // Mulai ronde pertama
+        
+        // Karena Player/Enemy sudah didefinisikan, kita bisa langsung mulai ronde pertama
+        nextRound(); 
     }
 
     // --- EVENT LISTENERS ---
+    
+    startGameButton.addEventListener('click', startGame);
+
+    restartButton.addEventListener('click', () => {
+        // Tampilkan kembali Setup Screen untuk memilih ulang
+        setupScreen.style.display = 'flex';
+        gameUI.style.opacity = '0';
+        scoreUI.style.opacity = '0';
+        canvas.style.opacity = '0.4'; // Sedikit gelap saat di Setup
+        restartButton.style.display = 'none';
+        
+        // Hentikan Loop Animasi yang mungkin masih berjalan
+        if (timerId) clearTimeout(timerId);
+    });
+
     window.addEventListener('keydown', (event) => {
-        if (matchOver && event.key === 'r') {
-            startGame();
-            return;
-        }
+        // Jika Setup Screen aktif, jangan izinkan input game
+        if (setupScreen.style.display === 'flex') return;
 
         if (!isGameRunning || player.dead) return;
 
         // Player 1
         switch (event.key) {
-            case 'd':
-                keys.d.pressed = true;
-                player.lastKey = 'd';
-                break;
-            case 'a':
-                keys.a.pressed = true;
-                player.lastKey = 'a';
-                break;
+            case 'd': keys.d.pressed = true; player.lastKey = 'd'; break;
+            case 'a': keys.a.pressed = true; player.lastKey = 'a'; break;
             case 'w':
                 if (player.velocity.y === 0) player.velocity.y = -20;
                 break;
-            case ' ':
-                player.attack();
-                break;
+            case ' ': player.attack(); break;
         }
 
         // Player 2
         if (!isGameRunning || enemy.dead) return;
 
         switch (event.key) {
-            case 'ArrowRight':
-                keys.ArrowRight.pressed = true;
-                enemy.lastKey = 'ArrowRight';
-                break;
-            case 'ArrowLeft':
-                keys.ArrowLeft.pressed = true;
-                enemy.lastKey = 'ArrowLeft';
-                break;
+            case 'ArrowRight': keys.ArrowRight.pressed = true; enemy.lastKey = 'ArrowRight'; break;
+            case 'ArrowLeft': keys.ArrowLeft.pressed = true; enemy.lastKey = 'ArrowLeft'; break;
             case 'ArrowUp':
                 if (enemy.velocity.y === 0) enemy.velocity.y = -20;
                 break;
-            case 'Enter':
-                enemy.attack();
-                break;
+            case 'Enter': enemy.attack(); break;
         }
     });
 
@@ -614,8 +880,11 @@
         }
     });
 
-    // Mulai game saat halaman dimuat
-    startGame();
+    // --- Mulai Inisialisasi ---
+    // Render setup screen saat dimuat. Game dimulai hanya jika tombol Start diklik.
+    renderSetupScreen();
+    // Panggil animate sekali untuk menampilkan tampilan awal (walaupun game belum berjalan)
+    animate(); 
 
 </script>
 </body>
